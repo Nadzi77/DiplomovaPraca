@@ -18,5 +18,7 @@
 * Výber vhodného detektora pre rozpoznávanie a detekciu objektov v reálnom čase (apríl 2022)  
 * Testovanie detektora YOLOv5 (apríl 2022)  
 * Príprava kostry diplomovej práce v LaTex (máj 2022)
-* Hľadanie ďalších článkov, bližšie skúmajúcich predikciu pohybu (máj 2022 dodnes)  
-
+* Hľadanie ďalších článkov, bližšie skúmajúcich predikciu pohybu (jún 2022)
+* Študovanie oblasti neurónových sietí (august-december 2022)
+* Prvé testovanie trénovania neurónových sietí (október 2022)
+* Hľadanie vhodných datasetov pre túto prácu (október-november 2022)
