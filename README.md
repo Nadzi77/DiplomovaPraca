@@ -1,9 +1,9 @@
 # Diplomová Práca
 
-**Názov:** &ensp;&ensp;&ensp; **Bezpečnosť účastníkov cestnej premávky**
-**Autor:**  &ensp; &ensp; &ensp;Bc. Matúš Nadžady
-**Školiteľ:**  &ensp; &ensp;RNDr. Zuzana Černeková, PhD.
-**Anotácia:**   &ensp;  Naštudovať problematiku sledovania cestnej premávky. Zamerať sa na detekciu a segmentáciu účastníkov cestnej premávky, najmä chodcov. Analyzovať existujúce riešenia publikované v dostupnej odbornej literatúre. Navrhnúť a implementovať metódu na predikciu pohybu chodcov a možnej kolízie s nimi. Preskúmať prínosy pri využití RGBD dát. Vyhodnotiť dosiahnuté výsledky.
+**Názov:** &ensp;&ensp;&ensp; **Bezpečnosť účastníkov cestnej premávky**  
+**Autor:**  &ensp; &ensp; &ensp;Bc. Matúš Nadžady  
+**Školiteľ:**  &ensp; &ensp;RNDr. Zuzana Černeková, PhD.  
+**Anotácia:**   &ensp;  Naštudovať problematiku sledovania cestnej premávky. Zamerať sa na detekciu a segmentáciu účastníkov cestnej premávky, najmä chodcov. Analyzovať existujúce riešenia publikované v dostupnej odbornej literatúre. Navrhnúť a implementovať metódu na predikciu pohybu chodcov a možnej kolízie s nimi. Preskúmať prínosy pri využití RGBD dát. Vyhodnotiť dosiahnuté výsledky.  
 
 **Link na prácu:**
 * https://www.overleaf.com/read/tytpcxpkjdvz
@@ -36,8 +36,6 @@
 
 <br>
 
-----------
-
 ## **Ukážky z výskumu:**
 
 <br>
@@ -47,7 +45,7 @@
 Porovnanie výsledkov detekcie dvoch rôznych detektorov: YOLOv5 a YOLOv7. Test na rovnakom obraze:
 
 <div style="display: flex; justify-content: center;">
-  <img src="data\YOLOv5vsYOLOv7.png" alt="drawing" style="width:50%;"/>
+  <img src="data\YOLOv5vsYOLOv7.png" alt="drawing" style="width:60%;"/>
 </div>
 <br>
 
@@ -55,7 +53,7 @@ Porovnanie výsledkov detekcie dvoch rôznych detektorov: YOLOv5 a YOLOv7. Test 
 Okrem toho, že verzia 7 bola presnejšia, je aj násobne rýchlejšia. Preto v ďalšom výskume budeme používať tento detektor. Na nasledujúcom gif-e je YOLOv7 aplikované na videu z nami získaného datasetu.
 
 <div style="display: flex; justify-content: center;">
-  <img src="data\Jur_2_demo_det_SHORT.gif" alt="drawing" style="width:50%;"/>
+  <img src="data\Jur_2_demo_det_SHORT.gif" alt="drawing" style="width:90%;"/>
 </div>
 <br>
 
@@ -64,7 +62,7 @@ Okrem toho, že verzia 7 bola presnejšia, je aj násobne rýchlejšia. Preto v 
 Objekty sú detekované nezávisle na snímku, nezachovávajú informáciu medzi nimi. Aby sme dokázali objekty identifikovať, využívame algoritmus SORT. Vďaka svojej jednoduchosti je jedným z najrýchlejších algoritmov, ktoré riešia tento problém identifikácie.
 
 <div style="display: flex; justify-content: center;">
-  <img src="data\Jur_2_demo_sort_SHORT.gif" alt="drawing" style="width:50%;"/>
+  <img src="data\Jur_2_demo_sort_SHORT.gif" alt="drawing" style="width:90%;"/>
 </div>
 <br>
 
