@@ -52,19 +52,11 @@ Porovnanie výsledkov detekcie dvoch rôznych detektorov: YOLOv5 a YOLOv7. Test 
 
 Okrem toho, že verzia 7 bola presnejšia, je aj násobne rýchlejšia. Preto v ďalšom výskume budeme používať tento detektor. Na nasledujúcom gif-e je YOLOv7 aplikované na videu z nami získaného datasetu.
 
-<div style="display: flex; justify-content: center;">
-  <img src="data\Jur_2_demo_det_SHORT.gif" alt="drawing" style="width:90%;"/>
-</div>
-<br>
+
 
 **YOLOv7 + SORT**
 
 Objekty sú detekované nezávisle na snímku, nezachovávajú informáciu medzi nimi. Aby sme dokázali objekty identifikovať, využívame algoritmus SORT. Vďaka svojej jednoduchosti je jedným z najrýchlejších algoritmov, ktoré riešia tento problém identifikácie.
-
-<div style="display: flex; justify-content: center;">
-  <img src="data\Jur_2_demo_sort_SHORT.gif" alt="drawing" style="width:90%;"/>
-</div>
-<br>
 
 
 Okrem identifikácie bola zapracovaná funkcionalita sledovania bývalých pozícii daného objektu. Tie budeme využívať pri predikcii ďalšieho pohybu.
