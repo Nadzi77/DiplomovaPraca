@@ -17,8 +17,9 @@ from utils.torch_utils import select_device, load_classifier, time_synchronized,
 
 from sort import *
 
-# python detect_or_track.py --weights yolov7-e6.pt --no-trace --view-img --source inference\images\Jur_1_demo.mp4 --track --classes 0 1 2 3 5 6 7 16 --show-track
-# python detect_or_track.py --weights yolov7-e6.pt --no-trace --view-img --source inference\images\Jur_2_demo.mp4 --track --classes 0 --show-track
+
+# python detect_or_track_create_dataset.py --weights yolov7-e6.pt --no-trace --view-img --source inference\images\Jur_1_demo.mp4 --track --classes 0 1 2 3 5 6 7 16 --show-track
+# python detect_or_track_create_dataset.py --weights yolov7-e6.pt --no-trace --view-img --source inference\images\Jur_2_demo.mp4 --track --classes 0 --show-track
 
 """Function to Draw Bounding boxes"""
 def draw_boxes(img, bbox, identities=None, categories=None, confidences = None, names=None, colors = None):
@@ -48,6 +49,7 @@ def draw_boxes(img, bbox, identities=None, categories=None, confidences = None, 
 
 
 def detect(save_img=False):
+    xixi = 1
     source, weights, view_img, save_txt, imgsz, trace = opt.source, opt.weights, opt.view_img, opt.save_txt, opt.img_size, not opt.no_trace
     save_img = not opt.nosave and not source.endswith('.txt')  # save inference images
     webcam = source.isnumeric() or source.endswith('.txt') or source.lower().startswith(
@@ -102,10 +104,27 @@ def detect(save_img=False):
     t0 = time.time()
     ###################################
     startTime = 0
-    xx = 0
+    #MemoNet
+    # final_pos = np.empty((0,20,2))
+    final_pos = np.empty((0,4))
+    ooo = 0
+    frame_number = 0
+
+    # 2.5 FPS simulation
+    # xx = -1
     ###################################
     for path, img, im0s, vid_cap in dataset:
-        xx += 1
+        # if frame_number == 0:
+        #     last_path = path
+        
+        # 2.5 FPS simulation
+        # xx += 1
+        # if xx % 10 != 0:
+        #     continue
+
+        frame_number += 1
+        frame_positions = np.empty((0,4))
+
         img = torch.from_numpy(img).to(device)
         img = img.half() if half else img.float()  # uint8 to fp16/32
         img /= 255.0  # 0 - 255 to 0.0 - 1.0
@@ -175,31 +194,41 @@ def detect(save_img=False):
 
                         if opt.show_track:
                             #loop over tracks
-                            for t, track in enumerate(tracks):               
+                            for t, track in enumerate(tracks):
+                                xixi = xixi * -1
                                 track_color = colors[int(track.detclass)] if not opt.unique_track_color else sort_tracker.color_list[t]
 
+                                # det_position = "bottom" if (int(track.detclass) in [0,1]) else "centroidarr"
                                 det_position = "centroidarr"
-                                
                                 posi = getattr(track, det_position)
+
+                                # MemoNet
+                                # 
+                                # a = []
+                                # if len(posi) > 40 and ooo % 50 == 0:  # less data
+                                #     # for i,_ in enumerate(posi):
+                                #     #     if i % 2 == 0:
+                                #     #         print((int(posi[i][0]),
+                                #     #                 int(posi[i][1])) )
+                                #     # print(track.id, len(getattr(track, det_position)))
+                                #     a = [ (int(posi[i][0]), int(posi[i][1])) for i,_ in  enumerate(posi) if i % 2 == 0 ]
+                                #     a = np.array(a[-20:])
+                                #     a3d = a[np.newaxis,...]
+
+                                #     final_pos = np.vstack((final_pos, a3d))
+                                # ooo = ooo + 1
                                 [cv2.line(im0, (int(posi[i][0]),
-                                                int(posi[i][1])), 
+                                                int(posi[i][1])),
                                                 (int(posi[i+1][0]),
                                                 int(posi[i+1][1])),
-                                                track_color, thickness=opt.thickness) 
-                                                for i,_ in  enumerate(posi) 
-                                                    if i < len(posi)-1 ] 
-                                if len(posi) > 10:
-                                    last10Posi = posi[-10:]
-                                    sumX = np.sum(np.array(last10Posi), axis=0)[0]
-                                    sumY = np.sum(np.array(last10Posi), axis=0)[1]
-                                    prevX = sumX / 10
-                                    prevY = sumY / 10
-                                    actX = posi[-1][0]
-                                    actY = posi[-1][1]
-                                    futX = actX + 5 * (actX - prevX)
-                                    futY = actY + 5 * (actY - prevY)
-                                    cv2.line(im0, (int(futX), int(futY)), (int(actX), int(actY)), (0,0,255), thickness=opt.thickness)
+                                                track_color, thickness=opt.thickness)
+                                                for i,_ in  enumerate(getattr(track, det_position)) 
+                                                    if i < len(getattr(track, det_position))-1 ] 
                                 
+                                # SGAN/..
+                                #
+                                frame_positions = np.vstack((frame_positions, np.array([10 * frame_number, track.id, int(posi[i][0]), int(posi[i][1])])))
+
                 else:
                     bbox_xyxy = dets_to_sort[:,:4]
                     identities = None
@@ -240,6 +269,8 @@ def detect(save_img=False):
                         if isinstance(vid_writer, cv2.VideoWriter):
                             vid_writer.release()  # release previous video writer
                         if vid_cap:  # video
+                            # 2.5 FPS simulation
+                            # fps = 2.5
                             fps = vid_cap.get(cv2.CAP_PROP_FPS)
                             w = int(vid_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
                             h = int(vid_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -248,6 +279,32 @@ def detect(save_img=False):
                             save_path += '.mp4'
                         vid_writer = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
                     vid_writer.write(im0)
+
+        final_pos = np.vstack((final_pos, frame_positions))
+        last_path = path
+
+    # SGAN
+    # print(final_pos.shape)
+    if final_pos.shape[0] > 0:
+        with open('positions_%s.txt' % p.name, 'a') as f:
+            for i in range(final_pos.shape[0]):
+                final_pos[i]
+                for j in range(4):
+                    f.write(str(final_pos[i][j]) + '\t')
+                f.write('\n')
+      
+    # MemoNet
+    print(f'Done. Total frames calculated: {frame_number}')
+    # print(f'Done. Final data length: {final_pos.shape[0]}')
+    # if final_pos.shape[0] > 0:
+    #     with open('positions2.txt', 'w') as f:
+            
+    #         for i in range(final_pos.shape[0]):
+    #             for j in range(20):
+    #                 f.write(str(final_pos[i][j][0]) + ',' + str(final_pos[i][j][1]) + '\n')
+    #             f.write("XX" + '\n')
+
+
 
     if save_txt or save_img:
         s = f"\n{len(list(save_dir.glob('labels/*.txt')))} labels saved to {save_dir / 'labels'}" if save_txt else ''
@@ -273,7 +330,7 @@ if __name__ == '__main__':
     parser.add_argument('--augment', action='store_true', help='augmented inference')
     parser.add_argument('--update', action='store_true', help='update all models')
     parser.add_argument('--project', default='runs/detect', help='save results to project/name')
-    parser.add_argument('--name', default='exp', help='save results to project/name')
+    parser.add_argument('--name', default='eexp', help='save results to project/name')
     parser.add_argument('--exist-ok', action='store_true', help='existing project/name ok, do not increment')
     parser.add_argument('--no-trace', action='store_true', help='don`t trace model')
     #######################################################
