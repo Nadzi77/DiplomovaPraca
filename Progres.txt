@@ -1,0 +1,47 @@
+YOLO7 + SORT
+Vytvoril som py súbor detect_or_track_create_dataset.py v ktorom vytvaram dataset.
+Najprv som vytvaral subor positions.txt s riadkami x,y , kazdych 20 riadkov bol symbol XX.
+
+Neskor som vytvaral dataset do siete SGAN (subory v priecinku SGAN-2.5 - zo styroch, cca 5min videi). Aby boli data analogicke datasetu ETH/UCY.
+Riadky zodpovedali [frameId personId x y] Spracovaval som kazdy 10 frame, vysledne video 2.5 FPS
+Suradnice x,y su v ETH/UCY datasete v metroch, ja to mam v pixeloch (co moze byt problem)
+
+Subory v priecinku SGAN-2.5-SeparatedVideos je to iste ale spracovaval som len 10 sekundove videa.  (14 videi)
+To znamena ze som nemal dostatok dat, kedze 10 sekundove videa o 2.5FPS je 25 pozicii, a do siete treba min. 20.
+
+Dalej som skusal vytvorit data z jedneho celeho 5minutoveho videa 25FPS (subory v priecinku SGAN-25). Dalo to rovnake vysledky ako pri 2.5FPS
+
+Odskusal som aj iny model, zara2_12_model.pt, namiesto eth_12_model.pt
+
+
+SGAN vyplul nasledujuce vysledky pri evaluacii:
+
+podla clanku maju jednotlive modely nasledujuce chyby:
+
+|--------|-ADE--|-FDE--|
+| `ETH`  | 0.71 | 1.29 |
+| `Hotel`| 0.48 | 1.02 |
+| `Univ` | 0.56 | 1.18 |
+| `Zara1`| 0.34 | 0.69 |
+| `Zara2`| 0.31 | 0.64 |
+
+vyskusane:
+|---------Dataset----------|-------Model-------|-ADE--|-FDE--|--Unit--|
+| eth/test                 | eth_12_model.pt   | 0.69 | 1.27 | meters |
+| SGAN-2.5-SeparatedVideos | eth_12_model.pt   | 0.09 | 0.16 | pixels |
+|--------------------------|-------------------|------|------|--------|
+| SGAN-2.5                 | eth_12_model.pt   | 0.09 | 0.18 | pixels |
+| SGAN-2.5                 | hotel_12_model.pt | 0.07 | 0.15 | pixels |
+| SGAN-2.5                 | univ_12_model.pt  | 0.13 | 0.24 | pixels |
+| SGAN-2.5                 | zara1_12_model.pt | 0.07 | 0.13 | pixels |
+| SGAN-2.5                 | zara2_12_model.pt | 0.06 | 0.11 | pixels |
+|--------------------------|-------------------|------|------|--------|
+| SGAN-25                  | eth_12_model.pt   | 0.09 | 0.17 | pixels |
+| SGAN-25                  | hotel_12_model.pt | 0.07 | 0.15 | pixels |
+| SGAN-25                  | univ_12_model.pt  | 0.13 | 0.25 | pixels |
+| SGAN-25                  | zara1_12_model.pt | 0.07 | 0.14 | pixels |
+| SGAN-25                  | zara2_12_model.pt | 0.06 | 0.12 | pixels |
+ ---------------------------------------------------------------------
+
+ 
+ 
