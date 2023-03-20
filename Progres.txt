@@ -44,11 +44,11 @@ vyskusane:
 | SGAN-25                  | zara2_12_model.pt | 12.89 | 22.28 | pixels |
 |--------------------------|-------------------|-------|-------|--------|
 | SGAN-projected-25        | eth_12_model.pt   |  0.44 |  0.75 | meters |
-| SGAN-projected-25        | hotel_12_model.pt | ----- | ----- | meters |
-| SGAN-projected-25        | univ_12_model.pt  | ----- | ----- | meters |
-| SGAN-projected-25        | zara1_12_model.pt | ----- | ----- | meters |
-| SGAN-projected-25        | zara2_12_model.pt | ----- | ----- | meters |
- ---------------------------------------------------------------------
+| SGAN-projected-25        | hotel_12_model.pt |  0.52 |  0.91 | meters |
+| SGAN-projected-25        | univ_12_model.pt  |  0.47 |  0.79 | meters |
+| SGAN-projected-25        | zara1_12_model.pt |  0.47 |  0.79 | meters |
+| SGAN-projected-25        | zara2_12_model.pt |  0.51 |  0.87 | meters |
+ -----------------------------------------------------------------------
 
  
  
