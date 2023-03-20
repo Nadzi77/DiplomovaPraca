@@ -26,21 +26,28 @@ podla clanku maju jednotlive modely nasledujuce chyby:
 | `Zara2`| 0.31 | 0.64 |
 
 vyskusane:
-|---------Dataset----------|-------Model-------|-ADE--|-FDE--|--Unit--|
-| eth/test                 | eth_12_model.pt   | 0.69 | 1.27 | meters |
-| SGAN-2.5-SeparatedVideos | eth_12_model.pt   | 0.09 | 0.16 | pixels |
-|--------------------------|-------------------|------|------|--------|
-| SGAN-2.5                 | eth_12_model.pt   | 0.09 | 0.18 | pixels |
-| SGAN-2.5                 | hotel_12_model.pt | 0.07 | 0.15 | pixels |
-| SGAN-2.5                 | univ_12_model.pt  | 0.13 | 0.24 | pixels |
-| SGAN-2.5                 | zara1_12_model.pt | 0.07 | 0.13 | pixels |
-| SGAN-2.5                 | zara2_12_model.pt | 0.06 | 0.11 | pixels |
-|--------------------------|-------------------|------|------|--------|
-| SGAN-25                  | eth_12_model.pt   | 0.09 | 0.17 | pixels |
-| SGAN-25                  | hotel_12_model.pt | 0.07 | 0.15 | pixels |
-| SGAN-25                  | univ_12_model.pt  | 0.13 | 0.25 | pixels |
-| SGAN-25                  | zara1_12_model.pt | 0.07 | 0.14 | pixels |
-| SGAN-25                  | zara2_12_model.pt | 0.06 | 0.12 | pixels |
+|---------Dataset----------|-------Model-------|--ADE--|--FDE--|--Unit--|
+| eth/test                 | eth_12_model.pt   |  0.69 |  1.27 | meters |
+|--------------------------|-------------------|-------|-------|--------|
+| SGAN-2.5-SeparatedVideos | eth_12_model.pt   |  0.09 |  0.16 | pixels |
+|--------------------------|-------------------|-------|-------|--------|
+| SGAN-2.5                 | eth_12_model.pt   | 38.39 | 65.60 | pixels |
+| SGAN-2.5                 | hotel_12_model.pt | 37.88 | 64.60 | pixels |
+| SGAN-2.5                 | univ_12_model.pt  | 38.01 | 64.90 | pixels |
+| SGAN-2.5                 | zara1_12_model.pt | 38.27 | 65.32 | pixels |
+| SGAN-2.5                 | zara2_12_model.pt | 38.43 | 65.57 | pixels |
+|--------------------------|-------------------|-------|-------|--------|
+| SGAN-25                  | eth_12_model.pt   | 12.68 | 21.80 | pixels |
+| SGAN-25                  | hotel_12_model.pt | 12.33 | 21.06 | pixels |
+| SGAN-25                  | univ_12_model.pt  | 12.39 | 21.22 | pixels |
+| SGAN-25                  | zara1_12_model.pt | 12.79 | 21.97 | pixels |
+| SGAN-25                  | zara2_12_model.pt | 12.89 | 22.28 | pixels |
+|--------------------------|-------------------|-------|-------|--------|
+| SGAN-projected-25        | eth_12_model.pt   |  0.44 |  0.75 | meters |
+| SGAN-projected-25        | hotel_12_model.pt | ----- | ----- | meters |
+| SGAN-projected-25        | univ_12_model.pt  | ----- | ----- | meters |
+| SGAN-projected-25        | zara1_12_model.pt | ----- | ----- | meters |
+| SGAN-projected-25        | zara2_12_model.pt | ----- | ----- | meters |
  ---------------------------------------------------------------------
 
  

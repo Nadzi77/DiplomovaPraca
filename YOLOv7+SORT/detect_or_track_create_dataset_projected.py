@@ -5,6 +5,7 @@ import cv2
 import torch
 import torch.backends.cudnn as cudnn
 from numpy import random
+from math import floor
 
 from models.experimental import attempt_load
 from utils.datasets import LoadStreams, LoadImages
@@ -47,8 +48,18 @@ def draw_boxes(img, bbox, identities=None, categories=None, confidences = None, 
 
     return img
 
+def plot_dots(im, h, dotsPersons, dotsCars):
+
+    projectedXY = np.matmul(h,dotsPersons)
+    for column in projectedXY.T:
+        cv2.circle(im,(floor(column[0]/column[2]),floor(column[1]/column[2])),5,(255,0,0),-1)
+
+    projectedXY = np.matmul(h,dotsCars)
+    for column in projectedXY.T:
+        cv2.circle(im,(floor(column[0]/column[2]),floor(column[1]/column[2])),5,(0,0,255),-1)
 
 def detect(save_img=False):
+    im_map = cv2.imread('inference/images/horses.jpg')
     xixi = 1
     source, weights, view_img, save_txt, imgsz, trace = opt.source, opt.weights, opt.view_img, opt.save_txt, opt.img_size, not opt.no_trace
     save_img = not opt.nosave and not source.endswith('.txt')  # save inference images
@@ -111,16 +122,16 @@ def detect(save_img=False):
     frame_number = 0
 
     # 2.5 FPS simulation
-    xx = -1
+    # xx = -1
     ###################################
     for path, img, im0s, vid_cap in dataset:
         # if frame_number == 0:
         #     last_path = path
         
         # 2.5 FPS simulation
-        xx += 1
-        if xx % 10 != 0:
-            continue
+        # xx += 1
+        # if xx % 10 != 0:
+        #     continue
 
         frame_number += 1
         frame_positions = np.empty((0,4))
@@ -155,6 +166,12 @@ def detect(save_img=False):
 
         # Process detections
         for i, det in enumerate(pred):  # detections per image
+
+            dotsPersons = np.array([[0],[0],[0]])
+            dotsCars = np.array([[0],[0],[0]])
+            firstPerson = True
+            firstCar = True
+
             if webcam:  # batch_size >= 1
                 p, s, im0, frame = path[i], '%g: ' % i, im0s[i].copy(), dataset.count
             else:
@@ -192,6 +209,7 @@ def detect(save_img=False):
                         categories = tracked_dets[:, 4]
                         confidences = None
 
+
                         if opt.show_track:
                             #loop over tracks
                             for t, track in enumerate(tracks):
@@ -202,21 +220,6 @@ def detect(save_img=False):
                                 det_position = "centroidarr"
                                 posi = getattr(track, det_position)
 
-                                # MemoNet
-                                # 
-                                # a = []
-                                # if len(posi) > 40 and ooo % 50 == 0:  # less data
-                                #     # for i,_ in enumerate(posi):
-                                #     #     if i % 2 == 0:
-                                #     #         print((int(posi[i][0]),
-                                #     #                 int(posi[i][1])) )
-                                #     # print(track.id, len(getattr(track, det_position)))
-                                #     a = [ (int(posi[i][0]), int(posi[i][1])) for i,_ in  enumerate(posi) if i % 2 == 0 ]
-                                #     a = np.array(a[-20:])
-                                #     a3d = a[np.newaxis,...]
-
-                                #     final_pos = np.vstack((final_pos, a3d))
-                                # ooo = ooo + 1
                                 [cv2.line(im0, (int(posi[i][0]),
                                                 int(posi[i][1])),
                                                 (int(posi[i+1][0]),
@@ -227,7 +230,12 @@ def detect(save_img=False):
                                 
                                 # SGAN/..
                                 #
-                                frame_positions = np.vstack((frame_positions, np.array([10 * frame_number, track.id, int(posi[-1][0]), int(posi[-1][1])])))
+                                point = np.array((int(posi[-1][0]), int(posi[-1][1]), 1))
+                                h = np.array( [[ 14.2201066, 49.4932872, -4396.45940],[ 4.79411588, 36.2500438, 697.715903],[ 0.018548692, 0.073372739, 1.00000000] ])
+                                proj_point_ext = np.matmul(h,point)
+                                proj_point = np.array([ floor(proj_point_ext[0]/proj_point_ext[2]), floor(proj_point_ext[1]/proj_point_ext[2]) ])
+
+                                frame_positions = np.vstack((frame_positions, np.array([10 * frame_number, track.id, proj_point[0]/10, proj_point[1]/10 ])))
 
                 else:
                     bbox_xyxy = dets_to_sort[:,:4]
@@ -246,13 +254,9 @@ def detect(save_img=False):
             # Stream results
 
             ######################################################
-            if dataset.mode != 'image' and opt.show_fps:
-                currentTime = time.time()
 
-                fps = 1/(currentTime - startTime)
-                startTime = currentTime
-                cv2.putText(im0, "FPS: " + str(int(fps)), (20, 70), cv2.FONT_HERSHEY_PLAIN, 2, (0,255,0),2)
             #######################################################
+
 
             if view_img:
                 cv2.imshow(str(p), im0)
@@ -270,8 +274,8 @@ def detect(save_img=False):
                             vid_writer.release()  # release previous video writer
                         if vid_cap:  # video
                             # 2.5 FPS simulation
-                            fps = 2.5
-                            # fps = vid_cap.get(cv2.CAP_PROP_FPS)
+                            # fps = 2.5
+                            fps = vid_cap.get(cv2.CAP_PROP_FPS)
                             w = int(vid_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
                             h = int(vid_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
                         else:  # stream
@@ -329,7 +333,7 @@ if __name__ == '__main__':
     parser.add_argument('--agnostic-nms', action='store_true', help='class-agnostic NMS')
     parser.add_argument('--augment', action='store_true', help='augmented inference')
     parser.add_argument('--update', action='store_true', help='update all models')
-    parser.add_argument('--project', default='runs/detect', help='save results to project/name')
+    parser.add_argument('--project', default='runs/detect_projected', help='save results to project/name')
     parser.add_argument('--name', default='exp', help='save results to project/name')
     parser.add_argument('--exist-ok', action='store_true', help='existing project/name ok, do not increment')
     parser.add_argument('--no-trace', action='store_true', help='don`t trace model')
