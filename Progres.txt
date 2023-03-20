@@ -9,10 +9,11 @@ Suradnice x,y su v ETH/UCY datasete v metroch, ja to mam v pixeloch (co moze byt
 Subory v priecinku SGAN-2.5-SeparatedVideos je to iste ale spracovaval som len 10 sekundove videa.  (14 videi)
 To znamena ze som nemal dostatok dat, kedze 10 sekundove videa o 2.5FPS je 25 pozicii, a do siete treba min. 20.
 
-Dalej som skusal vytvorit data z jedneho celeho 5minutoveho videa 25FPS (subory v priecinku SGAN-25). Dalo to rovnake vysledky ako pri 2.5FPS
+Dalej som skusal vytvorit data z jedneho celeho 5minutoveho videa 25FPS (subory v priecinku SGAN-25).
 
-Odskusal som aj iny model, zara2_12_model.pt, namiesto eth_12_model.pt
+Odskusal som aj ostatne modely - eth_12_model, hotel_12_model, univ_12_model, zara1_12_model, zara2_12_model.
 
+Dalsim pristupom bolo projektovanie pohladu kamery do vtacej perspektivy (pohladu "zhora") homografiou. Data v txt tak konecne boli v metroch. Tym padom aj vysledky v SGAN.
 
 SGAN vyplul nasledujuce vysledky pri evaluacii:
 
@@ -42,6 +43,12 @@ vyskusane:
 | SGAN-25                  | univ_12_model.pt  | 12.39 | 21.22 | pixels |
 | SGAN-25                  | zara1_12_model.pt | 12.79 | 21.97 | pixels |
 | SGAN-25                  | zara2_12_model.pt | 12.89 | 22.28 | pixels |
+|--------------------------|-------------------|-------|-------|--------|
+// | SGAN-projected-2.5       | eth_12_model.pt   |  0.44 |  0.75 | meters |
+// | SGAN-projected-2.5       | hotel_12_model.pt |  0.52 |  0.91 | meters |
+// | SGAN-projected-2.5       | univ_12_model.pt  |  0.47 |  0.79 | meters |
+// | SGAN-projected-2.5       | zara1_12_model.pt |  0.47 |  0.79 | meters |
+// | SGAN-projected-2.5       | zara2_12_model.pt |  0.51 |  0.87 | meters |
 |--------------------------|-------------------|-------|-------|--------|
 | SGAN-projected-25        | eth_12_model.pt   |  0.44 |  0.75 | meters |
 | SGAN-projected-25        | hotel_12_model.pt |  0.52 |  0.91 | meters |
