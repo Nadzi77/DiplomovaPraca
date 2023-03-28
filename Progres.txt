@@ -13,18 +13,27 @@ Dalej som skusal vytvorit data z jedneho celeho 5minutoveho videa 25FPS (subory 
 
 Odskusal som aj ostatne modely - eth_12_model, hotel_12_model, univ_12_model, zara1_12_model, zara2_12_model.
 
-Dalsim pristupom bolo projektovanie pohladu kamery do vtacej perspektivy (pohladu "zhora") homografiou. Data v txt tak konecne boli v metroch. Tym padom aj vysledky v SGAN.
+Dalsim pristupom bolo projektovanie pohladu kamery do vtacej perspektivy (pohladu "zhora") homografiou. Data v txt tak konecne boli v metroch. 
+Tym padom aj vysledky v SGAN.
 
 SGAN vyplul nasledujuce vysledky pri evaluacii:
 
 podla clanku maju jednotlive modely nasledujuce chyby:
 
 |--------|-ADE--|-FDE--|
-| `ETH`  | 0.71 | 1.29 |
-| `Hotel`| 0.48 | 1.02 |
-| `Univ` | 0.56 | 1.18 |
-| `Zara1`| 0.34 | 0.69 |
-| `Zara2`| 0.31 | 0.64 |
+| `ETH`  | 0.87 | 1.62 |
+| `Hotel`| 0.67 | 1.37 |
+| `Univ` | 0.76 | 1.52 |
+| `Zara1`| 0.35 | 0.68 |
+| `Zara2`| 0.42 | 0.84 |
+
+Podla Gitu (lepsie ako v clanku):
+|--------|-ADE--|-FDE--|
+| `ETH`  | 0.77 | 1.39 |
+| `Hotel`| 0.43 | 0.88 |
+| `Univ` | 0.75 | 1.50 |
+| `Zara1`| 0.34 | 0.68 |
+| `Zara2`| 0.36 | 0.73 |
 
 vyskusane:
 |---------Dataset----------|-------Model-------|--ADE--|--FDE--|--Unit--|
@@ -44,12 +53,6 @@ vyskusane:
 | SGAN-25                  | zara1_12_model.pt | 12.79 | 21.97 | pixels |
 | SGAN-25                  | zara2_12_model.pt | 12.89 | 22.28 | pixels |
 |--------------------------|-------------------|-------|-------|--------|
-// | SGAN-projected-2.5       | eth_12_model.pt   |  0.44 |  0.75 | meters |
-// | SGAN-projected-2.5       | hotel_12_model.pt |  0.52 |  0.91 | meters |
-// | SGAN-projected-2.5       | univ_12_model.pt  |  0.47 |  0.79 | meters |
-// | SGAN-projected-2.5       | zara1_12_model.pt |  0.47 |  0.79 | meters |
-// | SGAN-projected-2.5       | zara2_12_model.pt |  0.51 |  0.87 | meters |
-|--------------------------|-------------------|-------|-------|--------|
 | SGAN-projected-25        | eth_12_model.pt   |  0.44 |  0.75 | meters |
 | SGAN-projected-25        | hotel_12_model.pt |  0.52 |  0.91 | meters |
 | SGAN-projected-25        | univ_12_model.pt  |  0.47 |  0.79 | meters |
@@ -57,5 +60,27 @@ vyskusane:
 | SGAN-projected-25        | zara2_12_model.pt |  0.51 |  0.87 | meters |
  -----------------------------------------------------------------------
 
+ -----------------------------------------------------------------------------------------------------------------
+ Dalej som sa pozrel na siet MemoNet. Podla clanku by mali mat nasledujuce uspesnosti:
  
- 
+ETH   0.40 / 0.61
+HOTEL 0.11 / 0.17
+UNIV  0.24 / 0.43
+ZARA1 0.18 / 0.32
+ZARA2 0.14 / 0.24
+
+ja som to testol a vysli mi rovnake/veeelmi podobne
+
+vytvoril som nove data, podobne SGAN, ale vytvorene z 20s videi a riadky su vo formate:
+[frameId personId "Pedestrian -1.0 -1.0 -1.0 -1.0 -1.0 -1.0 -1.0 -1.0 -1.0 -1.0" x "-1.0" y "-1.0"]
+frameId sa inkrementuje po 1 na rozdiel po 10 v SGAN
+
+results:
+
+|---------Dataset------------|---Model---|--ADE--|--FDE--|--Unit--|
+| MemoNet-projected-25-short |  MemoNet  |  0.21 |  0.23 | meters |
+| MemoNet-projected-25-long  |  MemoNet  |  0.16 |  0.16 | meters |
+------------------------------------------------------------------
+
+
+

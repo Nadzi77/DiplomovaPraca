@@ -103,6 +103,7 @@ def detect(save_img=False):
     ###################################
     startTime = 0
     xx = 0
+
     ###################################
     for path, img, im0s, vid_cap in dataset:
         xx += 1
@@ -181,13 +182,16 @@ def detect(save_img=False):
                                 det_position = "centroidarr"
                                 
                                 posi = getattr(track, det_position)
+
                                 [cv2.line(im0, (int(posi[i][0]),
                                                 int(posi[i][1])), 
                                                 (int(posi[i+1][0]),
                                                 int(posi[i+1][1])),
                                                 track_color, thickness=opt.thickness) 
                                                 for i,_ in  enumerate(posi) 
-                                                    if i < len(posi)-1 ] 
+                                                    if i < len(posi)-1 ]
+
+
                                 if len(posi) > 10:
                                     last10Posi = posi[-10:]
                                     sumX = np.sum(np.array(last10Posi), axis=0)[0]
@@ -272,7 +276,7 @@ if __name__ == '__main__':
     parser.add_argument('--agnostic-nms', action='store_true', help='class-agnostic NMS')
     parser.add_argument('--augment', action='store_true', help='augmented inference')
     parser.add_argument('--update', action='store_true', help='update all models')
-    parser.add_argument('--project', default='runs/detect', help='save results to project/name')
+    parser.add_argument('--project', default='runs/det_or_track', help='save results to project/name')
     parser.add_argument('--name', default='exp', help='save results to project/name')
     parser.add_argument('--exist-ok', action='store_true', help='existing project/name ok, do not increment')
     parser.add_argument('--no-trace', action='store_true', help='don`t trace model')

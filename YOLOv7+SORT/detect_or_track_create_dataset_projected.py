@@ -234,8 +234,12 @@ def detect(save_img=False):
                                 h = np.array( [[ 14.2201066, 49.4932872, -4396.45940],[ 4.79411588, 36.2500438, 697.715903],[ 0.018548692, 0.073372739, 1.00000000] ])
                                 proj_point_ext = np.matmul(h,point)
                                 proj_point = np.array([ floor(proj_point_ext[0]/proj_point_ext[2]), floor(proj_point_ext[1]/proj_point_ext[2]) ])
-
-                                frame_positions = np.vstack((frame_positions, np.array([10 * frame_number, track.id, proj_point[0]/10, proj_point[1]/10 ])))
+                                
+                                
+                                # SGAN
+                                # frame_positions = np.vstack((frame_positions, np.array([10 * frame_number, track.id, proj_point[0]/10, proj_point[1]/10 ])))
+                                # MemoNetNew
+                                frame_positions = np.vstack((frame_positions, np.array([10 + frame_number, track.id + 1, proj_point[0]/10, proj_point[1]/10 ])))
 
                 else:
                     bbox_xyxy = dets_to_sort[:,:4]
@@ -287,14 +291,23 @@ def detect(save_img=False):
         final_pos = np.vstack((final_pos, frame_positions))
         last_path = path
 
-    # SGAN
+    # SGAN and MemoNetNew
     # print(final_pos.shape)
     if final_pos.shape[0] > 0:
         with open('positions_%s.txt' % p.name, 'a') as f:
             for i in range(final_pos.shape[0]):
                 final_pos[i]
                 for j in range(4):
-                    f.write(str(final_pos[i][j]) + '\t')
+                    # SGAN
+                    # f.write(str(final_pos[i][j]) + '\t')
+                    # MemoNetNew
+                    f.write(str(final_pos[i][j]) + ' ')
+                    if j == 1: 
+                        f.write('Pedestrian -1.0 -1.0 -1.0 -1.0 -1.0 -1.0 -1.0 -1.0 -1.0 -1.0 ')
+                    if j == 2: 
+                        f.write('-1.0 ')
+                    if j == 3: 
+                        f.write('-1.0')
                 f.write('\n')
       
     # MemoNet

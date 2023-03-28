@@ -287,6 +287,49 @@ class Sort(object):
                 if unique_color:
                     self.color_list.pop(i)
 
+        for trk in self.trackers:
+            # POKUS 1
+            # no = 15
+            # if len(trk.centroidarr) > no:
+            #     sumX = sumY = a = 0
+            #     for i in range(no):
+            #         constant = ((no * no - i * i))
+            #         a += constant
+            #         sumX += constant * trk.centroidarr[-i+1][0]
+            #         sumY += constant * trk.centroidarr[-i+1][1]
+                
+            #     partX = (sumX / a) // 1
+            #     partY = (sumY / a) // 1
+            #     vecX = trk.centroidarr[-2][0] - partX
+            #     vecY = trk.centroidarr[-2][1] - partY
+            #     finX = partX + 2 * vecX
+            #     finY = partY + 2 * vecY
+                
+            #     vec2X = trk.centroidarr[-1][0] - finX
+            #     vec2Y = trk.centroidarr[-1][1] - finY
+            #     resX = (finX + (2/3) * vec2X) // 1
+            #     resY = (finY + (2/3) * vec2Y) // 1
+            #     res = tuple((resX,resY))
+            #     trk.centroidarr[-1] = res
+            
+            # POKUS 2
+            no = 31
+            helpVar = (no / 2) // 1
+            portion = helpVar / (helpVar + 1)
+            if len(trk.centroidarr) > no:
+                sumX = sumY = 0
+                for i in range(no):
+                    sumX += trk.centroidarr[-(i+2)][0]
+                    sumY += trk.centroidarr[-(i+2)][1]
+                
+                partX = (sumX / no) // 1
+                partY = (sumY / no) // 1
+                vecX = trk.centroidarr[-1][0] - partX
+                vecY = trk.centroidarr[-1][1] - partY
+                finX = partX + (portion * vecX) // 1
+                finY = partY + (portion * vecY) // 1
+                res = tuple((finX,finY))
+                trk.centroidarr[-2] = res
         if(len(ret) > 0):
             return np.concatenate(ret)
         return np.empty((0,6))
