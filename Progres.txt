@@ -53,15 +53,21 @@ vyskusane:
 | SGAN-25                  | zara1_12_model.pt | 12.79 | 21.97 | pixels |
 | SGAN-25                  | zara2_12_model.pt | 12.89 | 22.28 | pixels |
 |--------------------------|-------------------|-------|-------|--------|
-| SGAN-projected-25        | eth_12_model.pt   |  0.44 |  0.75 | meters |
-| SGAN-projected-25        | hotel_12_model.pt |  0.52 |  0.91 | meters |
-| SGAN-projected-25        | univ_12_model.pt  |  0.47 |  0.79 | meters |
-| SGAN-projected-25        | zara1_12_model.pt |  0.47 |  0.79 | meters |
-| SGAN-projected-25        | zara2_12_model.pt |  0.51 |  0.87 | meters |
+| SGAN-projected-25-short  | eth_12_model.pt   |  0.53 |  0.90 | meters |
+| SGAN-projected-25-short  | hotel_12_model.pt |  0.62 |  1.11 | meters |
+| SGAN-projected-25-short  | univ_12_model.pt  |  0.54 |  0.92 | meters |
+| SGAN-projected-25-short  | zara1_12_model.pt |  0.56 |  0.65 | meters |
+| SGAN-projected-25-short  | zara2_12_model.pt |  0.62 |  1.05 | meters |
+|--------------------------|-------------------|-------|-------|--------|
+| SGAN-projected-25-long   | eth_12_model.pt   |  0.44 |  0.75 | meters |
+| SGAN-projected-25-long   | hotel_12_model.pt |  0.52 |  0.91 | meters |
+| SGAN-projected-25-long   | univ_12_model.pt  |  0.47 |  0.79 | meters |
+| SGAN-projected-25-long   | zara1_12_model.pt |  0.47 |  0.79 | meters |
+| SGAN-projected-25-long   | zara2_12_model.pt |  0.51 |  0.87 | meters |
  -----------------------------------------------------------------------
 
- -----------------------------------------------------------------------------------------------------------------
- Dalej som sa pozrel na siet MemoNet. Podla clanku by mali mat nasledujuce uspesnosti:
+ --------------------------------------------------------------------------------------------------------------------------------------------
+Dalej som sa pozrel na siet MemoNet. Podla clanku by mali mat nasledujuce uspesnosti:
  
 ETH   0.40 / 0.61
 HOTEL 0.11 / 0.17
@@ -75,12 +81,48 @@ vytvoril som nove data, podobne SGAN, ale vytvorene z 20s videi a riadky su vo f
 [frameId personId "Pedestrian -1.0 -1.0 -1.0 -1.0 -1.0 -1.0 -1.0 -1.0 -1.0 -1.0" x "-1.0" y "-1.0"]
 frameId sa inkrementuje po 1 na rozdiel po 10 v SGAN
 
-results:
+vysledky:
 
 |---------Dataset------------|---Model---|--ADE--|--FDE--|--Unit--|
 | MemoNet-projected-25-short |  MemoNet  |  0.21 |  0.23 | meters |
 | MemoNet-projected-25-long  |  MemoNet  |  0.16 |  0.16 | meters |
 ------------------------------------------------------------------
+
+
+ --------------------------------------------------------------------------------------------------------------------------------------------
+Dalsou sietou je TPNMS. Podla clanku by mali mat nasledujuce uspesnosti:
+ 
+ETH   0.52 / 0.89
+HOTEL 0.22 / 0.39
+UNIV  0.55 / 1.13
+ZARA1 0.35 / 0.70
+ZARA2 0.27 / 0.56
+
+ja som to testol a vysli mi rovnake/veeelmi podobne
+
+Otestoval som to na rovnakych datach ako tie zo SGAN
+
+vysledky:
+
+| `ETH`  | 0.87 | 1.62 |
+| `Hotel`| 0.67 | 1.37 |
+| `Univ` | 0.76 | 1.52 |
+| `Zara1`| 0.35 | 0.68 |
+| `Zara2`| 0.42 | 0.84 |
+|---------Dataset---------|--Model--|--ADE--|--FDE--|--Unit--|
+| SGAN-projected-25-short |  ETH    |  0.34 |  0.53 | meters |
+| SGAN-projected-25-short |  Hotel  |  0.33 |  0.53 | meters |
+| SGAN-projected-25-short |  Univ   |  0.42 |  0.66 | meters |
+| SGAN-projected-25-short |  Zara1  |  0.44 |  0.72 | meters |
+| SGAN-projected-25-short |  Zara2  |  0.45 |  0.75 | meters |
+|-------------------------|---------|-------|-------|--------|
+| SGAN-projected-25-short |  ETH    |  0.25 |  0.37 | meters |
+| SGAN-projected-25-short |  Hotel  |  0.25 |  0.39 | meters |
+| SGAN-projected-25-short |  Univ   |  0.29 |  0.43 | meters |
+| SGAN-projected-25-short |  Zara1  |  0.32 |  0.51 | meters |
+| SGAN-projected-25-short |  Zara2  |  0.33 |  0.53 | meters |
+--------------------------------------------------------------
+
 
 
 
