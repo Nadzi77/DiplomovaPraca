@@ -48,7 +48,7 @@ def draw_boxes(img, bbox, identities=None, categories=None, confidences = None, 
 
 
 def detect(save_img=False):
-    source, weights, view_img, save_txt, imgsz, trace = opt.source, opt.weights, opt.view_img, opt.save_txt, opt.img_size, not opt.no_trace
+    source, weights, view_img, save_txt, imgsz, trace, resultFPS = opt.source, opt.weights, opt.view_img, opt.save_txt, opt.img_size, not opt.no_trace, opt.resultFPS
     save_img = not opt.nosave and not source.endswith('.txt')  # save inference images
     webcam = source.isnumeric() or source.endswith('.txt') or source.lower().startswith(
         ('rtsp://', 'rtmp://', 'http://', 'https://'))
@@ -102,11 +102,25 @@ def detect(save_img=False):
     t0 = time.time()
     ###################################
     startTime = 0
-    xx = 0
 
+    # 2.5/6/12 FPS simulation
+    xx = -1
     ###################################
     for path, img, im0s, vid_cap in dataset:
         xx += 1
+
+        if resultFPS != 25:
+            if resultFPS == 2.5:
+                modFPSvariable = 10
+            elif resultFPS == 6:
+                modFPSvariable = 4
+            else:
+                # elif resultFPS == 12:
+                modFPSvariable = 2
+
+            if xx % modFPSvariable != 0:
+                continue
+
         img = torch.from_numpy(img).to(device)
         img = img.half() if half else img.float()  # uint8 to fp16/32
         img /= 255.0  # 0 - 255 to 0.0 - 1.0
@@ -244,7 +258,9 @@ def detect(save_img=False):
                         if isinstance(vid_writer, cv2.VideoWriter):
                             vid_writer.release()  # release previous video writer
                         if vid_cap:  # video
-                            fps = vid_cap.get(cv2.CAP_PROP_FPS)
+                            # 2.5/6/12 FPS simulation
+                            fps = resultFPS
+                            # fps = vid_cap.get(cv2.CAP_PROP_FPS)
                             w = int(vid_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
                             h = int(vid_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
                         else:  # stream
@@ -289,6 +305,8 @@ if __name__ == '__main__':
     parser.add_argument('--nobbox', action='store_true', help='don`t show bounding box')
     parser.add_argument('--nolabel', action='store_true', help='don`t show label')
     parser.add_argument('--unique-track-color', action='store_true', help='show each track in unique color')
+    #######################################################
+    parser.add_argument('--resultFPS', type=float, default=25, help='Result video FPS')
     #######################################################
 
     opt = parser.parse_args()

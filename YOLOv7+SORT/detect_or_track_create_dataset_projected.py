@@ -61,7 +61,7 @@ def plot_dots(im, h, dotsPersons, dotsCars):
 def detect(save_img=False):
     im_map = cv2.imread('inference/images/horses.jpg')
     xixi = 1
-    source, weights, view_img, save_txt, imgsz, trace = opt.source, opt.weights, opt.view_img, opt.save_txt, opt.img_size, not opt.no_trace
+    source, weights, view_img, save_txt, imgsz, trace, resultFPS = opt.source, opt.weights, opt.view_img, opt.save_txt, opt.img_size, not opt.no_trace, opt.resultFPS
     save_img = not opt.nosave and not source.endswith('.txt')  # save inference images
     webcam = source.isnumeric() or source.endswith('.txt') or source.lower().startswith(
         ('rtsp://', 'rtmp://', 'http://', 'https://'))
@@ -121,17 +121,23 @@ def detect(save_img=False):
     ooo = 0
     frame_number = 0
 
-    # 2.5 FPS simulation
-    # xx = -1
+    # 2.5/6/12 FPS simulation
+    xx = -1
     ###################################
     for path, img, im0s, vid_cap in dataset:
-        # if frame_number == 0:
-        #     last_path = path
+        xx += 1
         
-        # 2.5 FPS simulation
-        # xx += 1
-        # if xx % 10 != 0:
-        #     continue
+        if resultFPS != 25:
+            if resultFPS == 2.5:
+                modFPSvariable = 10
+            elif resultFPS == 6:
+                modFPSvariable = 4
+            else:
+                # elif resultFPS == 12:
+                modFPSvariable = 2
+
+            if xx % modFPSvariable != 0:
+                continue
 
         frame_number += 1
         frame_positions = np.empty((0,4))
@@ -228,18 +234,20 @@ def detect(save_img=False):
                                                 for i,_ in  enumerate(getattr(track, det_position)) 
                                                     if i < len(getattr(track, det_position))-1 ] 
                                 
-                                # SGAN/..
-                                #
-                                point = np.array((int(posi[-1][0]), int(posi[-1][1]), 1))
-                                h = np.array( [[ 14.2201066, 49.4932872, -4396.45940],[ 4.79411588, 36.2500438, 697.715903],[ 0.018548692, 0.073372739, 1.00000000] ])
-                                proj_point_ext = np.matmul(h,point)
-                                proj_point = np.array([ floor(proj_point_ext[0]/proj_point_ext[2]), floor(proj_point_ext[1]/proj_point_ext[2]) ])
-                                
-                                
-                                # SGAN
-                                # frame_positions = np.vstack((frame_positions, np.array([10 * frame_number, track.id, proj_point[0]/10, proj_point[1]/10 ])))
-                                # MemoNetNew
-                                frame_positions = np.vstack((frame_positions, np.array([10 + frame_number, track.id + 1, proj_point[0]/10, proj_point[1]/10 ])))
+                                # write to file only in exact frames
+                                if frame_number > 20 and frame_number <= 40:
+
+
+                                    # SGAN/..
+                                    #
+                                    point = np.array((int(posi[-1][0]), int(posi[-1][1]), 1))
+                                    h = np.array( [[ 14.2201066, 49.4932872, -4396.45940],[ 4.79411588, 36.2500438, 697.715903],[ 0.018548692, 0.073372739, 1.00000000] ])
+                                    proj_point_ext = np.matmul(h,point)
+                                    proj_point = np.array([ floor(proj_point_ext[0]/proj_point_ext[2]), floor(proj_point_ext[1]/proj_point_ext[2]) ])
+                                    
+                                    
+                                    # SGAN / MemoNetNew
+                                    frame_positions = np.vstack((frame_positions, np.array([10 + frame_number, track.id + 1, proj_point[0]/10, proj_point[1]/10 ])))
 
                 else:
                     bbox_xyxy = dets_to_sort[:,:4]
@@ -257,17 +265,12 @@ def detect(save_img=False):
 
             # Stream results
 
-            ######################################################
-
-            #######################################################
-
-
             if view_img:
                 cv2.imshow(str(p), im0)
                 cv2.waitKey(1)  # 1 millisecond
 
             # Save results (image with detections)
-            if save_img:
+            if save_img and frame_number > 20 and frame_number <= 40:
                 if dataset.mode == 'image':
                     cv2.imwrite(save_path, im0)
                     print(f" The image with the result is saved in: {save_path}")
@@ -277,9 +280,9 @@ def detect(save_img=False):
                         if isinstance(vid_writer, cv2.VideoWriter):
                             vid_writer.release()  # release previous video writer
                         if vid_cap:  # video
-                            # 2.5 FPS simulation
-                            # fps = 2.5
-                            fps = vid_cap.get(cv2.CAP_PROP_FPS)
+                            # 2.5/6/12 FPS simulation
+                            fps = resultFPS
+                            # fps = vid_cap.get(cv2.CAP_PROP_FPS)
                             w = int(vid_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
                             h = int(vid_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
                         else:  # stream
@@ -346,7 +349,7 @@ if __name__ == '__main__':
     parser.add_argument('--agnostic-nms', action='store_true', help='class-agnostic NMS')
     parser.add_argument('--augment', action='store_true', help='augmented inference')
     parser.add_argument('--update', action='store_true', help='update all models')
-    parser.add_argument('--project', default='runs/detect_projected', help='save results to project/name')
+    parser.add_argument('--project', default='runs/detect_or_track_create_dataset_projected', help='save results to project/name')
     parser.add_argument('--name', default='exp', help='save results to project/name')
     parser.add_argument('--exist-ok', action='store_true', help='existing project/name ok, do not increment')
     parser.add_argument('--no-trace', action='store_true', help='don`t trace model')
@@ -359,6 +362,8 @@ if __name__ == '__main__':
     parser.add_argument('--nobbox', action='store_true', help='don`t show bounding box')
     parser.add_argument('--nolabel', action='store_true', help='don`t show label')
     parser.add_argument('--unique-track-color', action='store_true', help='show each track in unique color')
+    #######################################################
+    parser.add_argument('--resultFPS', type=float, default=25, help='Result video FPS')
     #######################################################
 
     opt = parser.parse_args()

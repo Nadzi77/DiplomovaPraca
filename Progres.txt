@@ -1,3 +1,17 @@
+PROGRES
+
+TODO:
+DETEKCIA: otestovat rozne verzie yolo a porovnat medzi sebou. Vybrat najlepsie.
+SLEDOVANIE: otestovat aspon dve verzie sledovacich algoritmov a vyhodnotit. Vybrat najlepsie.
+VYROBA TXT DATASETU Z VIDEO DATASETU: Vyhladenie trajektorii.  
+PREDIKCIA: porovnat linearne, SGAN, TPNMS, MemoNet - rychlost, presnost. Vybrat najlepsie.
+FINAL: Vyber najlepsich moznosti, pospajanie do jedneho riesenia. Ziskat titul. Mozme zomriet stastni.
+
+
+ --------------------------------------------------------------------------------------------------------------------------------------------
+
+
+DONE:
 YOLO7 + SORT
 Vytvoril som py súbor detect_or_track_create_dataset.py v ktorom vytvaram dataset.
 Najprv som vytvaral subor positions.txt s riadkami x,y , kazdych 20 riadkov bol symbol XX.
@@ -123,6 +137,54 @@ vysledky:
 | SGAN-projected-25-short |  Zara2  |  0.33 |  0.53 | meters |
 --------------------------------------------------------------
 
+ --------------------------------------------------------------------------------------------------------------------------------------------
+Vyber vhodneho FPS: zapracoval som to ako parameter pri spustani YOLO. Na vyber je 25,2.5,6 a 12.
+Pri 6 FPS je predikcia dopredu na 2s, co uz je rozumny cas na predikciu.
 
 
+Dalej som vyskusal jednotlive siete na "mikrodatasetoch" (napodobenie realtime). 
+Vytvoril som txt dataset (6 fps) o dlzke 20 framov (z 20s videa, ale to je jedno). Pustil som ho na viacerych modeloch.
+Testoval som predovsetkym rychlost modelu.
 
+SGAN: 
+Dataset: eth, Pred Len: 12, ADE: 0.93, FDE: 1.19
+Eval: 78.36 s
+datasets\one_pred_video
+Dataset: hotel, Pred Len: 12, ADE: 1.03, FDE: 1.57
+Eval: 1.92 s
+datasets\one_pred_video
+Dataset: univ, Pred Len: 12, ADE: 1.09, FDE: 1.58
+Eval: 1.88 s
+datasets\one_pred_video
+Dataset: zara1, Pred Len: 12, ADE: 1.07, FDE: 1.54
+Eval: 1.89 s
+datasets\one_pred_video
+Dataset: zara2, Pred Len: 12, ADE: 1.04, FDE: 1.34
+Eval: 1.89 s
+All: 1322.17 s
+
+teda radovo 1.8 sekund.
+
+TPNMS:
+Dataset: eth, Pred Len: 12, ADE: 0.545, FDE: 0.684
+Eval: 2.08 s
+Dataset: hotel, Pred Len: 12, ADE: 0.912, FDE: 1.363
+Eval: 0.78 s
+Dataset: univ, Pred Len: 12, ADE: 1.029, FDE: 1.586
+Eval: 0.80 s
+Dataset: zara1, Pred Len: 12, ADE: 0.934, FDE: 1.441
+Eval: 0.80 s
+Dataset: zara2, Pred Len: 12, ADE: 0.921, FDE: 1.337
+
+teda radovo 0.8 sekund.
+
+MemoNet
+Dataset: eth, Pred Len: 12, ADE: 0.408, FDE: 0.358
+Eval: 3.14 s
+All: 5.15 s
+
+ --------------------------------------------------------------------------------------------------------------------------------------------
+ 
+ 
+ 
+ 

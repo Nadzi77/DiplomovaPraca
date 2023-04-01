@@ -50,7 +50,7 @@ def draw_boxes(img, bbox, identities=None, categories=None, confidences = None, 
 
 def detect(save_img=False):
     xixi = 1
-    source, weights, view_img, save_txt, imgsz, trace = opt.source, opt.weights, opt.view_img, opt.save_txt, opt.img_size, not opt.no_trace
+    source, weights, view_img, save_txt, imgsz, trace, resultFPS = opt.source, opt.weights, opt.view_img, opt.save_txt, opt.img_size, not opt.no_trace, opt.resultFPS
     save_img = not opt.nosave and not source.endswith('.txt')  # save inference images
     webcam = source.isnumeric() or source.endswith('.txt') or source.lower().startswith(
         ('rtsp://', 'rtmp://', 'http://', 'https://'))
@@ -110,17 +110,25 @@ def detect(save_img=False):
     ooo = 0
     frame_number = 0
 
-    # 2.5 FPS simulation
+    # 2.5/6/12 FPS simulation
     xx = -1
     ###################################
     for path, img, im0s, vid_cap in dataset:
         # if frame_number == 0:
         #     last_path = path
         
-        # 2.5 FPS simulation
         xx += 1
-        if xx % 10 != 0:
-            continue
+        if resultFPS != 25:
+            if resultFPS == 2.5:
+                modFPSvariable = 10
+            elif resultFPS == 6:
+                modFPSvariable = 4
+            else:
+                # elif resultFPS == 12:
+                modFPSvariable = 2
+
+            if xx % modFPSvariable != 0:
+                continue
 
         frame_number += 1
         frame_positions = np.empty((0,4))
@@ -202,21 +210,6 @@ def detect(save_img=False):
                                 det_position = "centroidarr"
                                 posi = getattr(track, det_position)
 
-                                # MemoNet
-                                # 
-                                # a = []
-                                # if len(posi) > 40 and ooo % 50 == 0:  # less data
-                                #     # for i,_ in enumerate(posi):
-                                #     #     if i % 2 == 0:
-                                #     #         print((int(posi[i][0]),
-                                #     #                 int(posi[i][1])) )
-                                #     # print(track.id, len(getattr(track, det_position)))
-                                #     a = [ (int(posi[i][0]), int(posi[i][1])) for i,_ in  enumerate(posi) if i % 2 == 0 ]
-                                #     a = np.array(a[-20:])
-                                #     a3d = a[np.newaxis,...]
-
-                                #     final_pos = np.vstack((final_pos, a3d))
-                                # ooo = ooo + 1
                                 [cv2.line(im0, (int(posi[i][0]),
                                                 int(posi[i][1])),
                                                 (int(posi[i+1][0]),
@@ -269,8 +262,8 @@ def detect(save_img=False):
                         if isinstance(vid_writer, cv2.VideoWriter):
                             vid_writer.release()  # release previous video writer
                         if vid_cap:  # video
-                            # 2.5 FPS simulation
-                            fps = 2.5
+                            # 2.5/6/12 FPS simulation
+                            fps = resultFPS
                             # fps = vid_cap.get(cv2.CAP_PROP_FPS)
                             w = int(vid_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
                             h = int(vid_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -329,7 +322,7 @@ if __name__ == '__main__':
     parser.add_argument('--agnostic-nms', action='store_true', help='class-agnostic NMS')
     parser.add_argument('--augment', action='store_true', help='augmented inference')
     parser.add_argument('--update', action='store_true', help='update all models')
-    parser.add_argument('--project', default='runs/detect', help='save results to project/name')
+    parser.add_argument('--project', default='runs/detect_or_track_create_dataset', help='save results to project/name')
     parser.add_argument('--name', default='exp', help='save results to project/name')
     parser.add_argument('--exist-ok', action='store_true', help='existing project/name ok, do not increment')
     parser.add_argument('--no-trace', action='store_true', help='don`t trace model')
@@ -342,6 +335,8 @@ if __name__ == '__main__':
     parser.add_argument('--nobbox', action='store_true', help='don`t show bounding box')
     parser.add_argument('--nolabel', action='store_true', help='don`t show label')
     parser.add_argument('--unique-track-color', action='store_true', help='show each track in unique color')
+    #######################################################
+    parser.add_argument('--resultFPS', type=float, default=25, help='Result video FPS')
     #######################################################
 
     opt = parser.parse_args()
