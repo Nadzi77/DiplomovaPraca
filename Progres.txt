@@ -1,11 +1,11 @@
 PROGRES
 
 TODO:
-DETEKCIA: otestovat rozne verzie yolo a porovnat medzi sebou. Vybrat najlepsie.
-SLEDOVANIE: otestovat aspon dve verzie sledovacich algoritmov a vyhodnotit. Vybrat najlepsie.
-VYROBA TXT DATASETU Z VIDEO DATASETU: Vyhladenie trajektorii.  
+DETEKCIA: 
+SLEDOVANIE: 
+VYROBA TXT DATASETU Z VIDEO DATASETU: 
 PREDIKCIA: porovnat linearne, SGAN, TPNMS, MemoNet - rychlost, presnost. Vybrat najlepsie.
-FINAL: Vyber najlepsich moznosti, pospajanie do jedneho riesenia. Ziskat titul. Mozme zomriet stastni.
+FINAL: Vyber najlepsich moznosti, pospajanie do jedneho riesenia.
 
 
  --------------------------------------------------------------------------------------------------------------------------------------------
@@ -183,8 +183,47 @@ Dataset: eth, Pred Len: 12, ADE: 0.408, FDE: 0.358
 Eval: 3.14 s
 All: 5.15 s
 
- --------------------------------------------------------------------------------------------------------------------------------------------
- 
- 
- 
- 
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+-otestovat rozne verzie yolo a porovnat medzi sebou. Vybrat najlepsie.
+Skusanie YOLa - z celkoveho poctu 2731 ludi v testovacom videu Jur_1_demo.mp4 bolo yolom najdenych ludi:
+
+|----Model-----|------Video-----|-Found/Total-|--FPS--|
+| yolov7.pt    | Jur_1_demo.mp4 |  2100/2731  | 28.23 |
+| yolov7x.pt   | Jur_1_demo.mp4 |  2176/2731  | 24.44 |
+| yolov7-e6.pt | Jur_1_demo.mp4 |  1782/2731  | 23.92 |
+|--------------|----------------|-------------|-------|
+| yolov7.pt    | Jur_2_SP.mp4   |  1929/1972  | 26.81 |
+| yolov7x.pt   | Jur_2_SP.mp4   |  1944/1972  | 25.82 |
+| yolov7-e6.pt | Jur_2_SP.mp4   |  1830/1972  | 25.76 |
+|--------------|----------------|-------------|-------|
+
+Najviac nasiel model X, o nieco menej obycajny a najmenej e6.
+Najrychlejsi bol obycajny. najpomalsi e6 a o nieco malo rychlejsi x.
+
+Najlepsi pomer rychlost vykon - obycajny.
+
+
+
+----------------------------------------------------------------------------------------------------------------------
+
+-otestovat aspon dve verzie sledovacich algoritmov a vyhodnotit. Vybrat najlepsie.
+Otestoval som SORT a ByteTrack.
+Co sa tyka rychlosti, porovnaval som na troch videach (ozn vid1, vid2, vid3 resp. vid4), ktore mali postupne 10s, 20s, 60s a cca 3minuty
+
+|--Video--|-sledovac--|-Snimkov-|-Cas sledovania-|-FPS--|-Pocet jedinecnych ludi-|
+| vid1    | SORT      |  250    |  0.15s         | 1666 | 19                     |
+| vid1    | ByteTrack |  250    |  0.30s         | 833  | 13                     |
+|---------|-----------|---------|----------------|------|------------------------|
+| vid2    | SORT      |  598    |  0.77s         | 776  | 99                     |
+| vid2    | ByteTrack |  598    |  1.07s         | 558  | 23                     |
+|---------|-----------|---------|----------------|------|------------------------|
+| vid3    | SORT      |  1794   |  3.86s         | 465  | 346                    |
+| vid3    | ByteTrack |  1794   |  3.61s         | 497  | 113                    |
+|---------|-----------|---------|----------------|------|------------------------|
+| vid4    | SORT      |  5382   |  9.72s         | 552  | 877                    |
+| vid4    | ByteTrack |  5382   |  8.87s         | 606  | 254                    |
+|---------|-----------|---------|----------------|------|------------------------|
+
+
+---------------------------------------------------------------------------------------------------------------------

@@ -15,10 +15,11 @@ from utils.general import check_img_size, check_requirements, \
 from utils.plots import plot_one_box
 from utils.torch_utils import select_device, load_classifier, time_synchronized, TracedModel
 
+from bytetrack.byte_tracker import BYTETracker
 from sort import *
 
-# python detect_or_track.py --weights yolov7.pt --no-trace --view-img --source inference\images\Jur_1_demo.mp4 --track --classes 0 1 2 3 5 6 7 16 --show-track
-# python detect_or_track.py --weights yolov7.pt --no-trace --view-img --source inference\images\Jur_2_demo.mp4 --track --classes 0 --show-track
+# python detect_or_byteTrack.py --weights yolov7.pt --no-trace --view-img --source inference\images\Jur_1_demo.mp4 --track --classes 0 1 2 3 5 6 7 16 --show-track
+# python detect_or_byteTrack.py --weights yolov7.pt --no-trace --view-img --source inference\images\Jur_2_demo.mp4 --track --classes 0 --show-track          vidsLonger\Jur2_23_06_2022.mp4
 
 """Function to Draw Bounding boxes"""
 def draw_boxes(img, bbox, identities=None, categories=None, confidences = None, names=None, colors = None):
@@ -43,7 +44,6 @@ def draw_boxes(img, bbox, identities=None, categories=None, confidences = None, 
             cv2.rectangle(img, (x1, y1), c2, color, -1, cv2.LINE_AA)  # filled
             cv2.putText(img, label, (x1, y1 - 2), 0, tl / 3, [225, 255, 255], thickness=tf, lineType=cv2.LINE_AA)
 
-
     return img
 
 
@@ -55,6 +55,8 @@ def detect(save_img=False):
     
     # Directories
     save_dir = Path(increment_path(Path(opt.project) / opt.name, exist_ok=opt.exist_ok))  # increment run
+    fps_label = int(resultFPS) if resultFPS != 2.5 else 2.5
+    save_dir = save_dir.parent / f"{save_dir.name}_{fps_label}"
     if not opt.nosave:
         (save_dir / 'labels' if save_txt else save_dir).mkdir(parents=True, exist_ok=True)  # make dir
 
@@ -101,9 +103,8 @@ def detect(save_img=False):
 
     t0 = time.time()
     ###################################
-    startTime = 0
     trackTime = 0
-
+    tracks_dict = {}
     # 2.5/6/12 FPS simulation
     xx = -1
     ###################################
@@ -178,29 +179,41 @@ def detect(save_img=False):
                                 np.array([x1, y1, x2, y2, conf, detclass])))
 
 
-                if opt.track:                
+                if opt.track:
                     t0tr = time.time()
-                    tracked_dets = sort_tracker.update(dets_to_sort, opt.unique_track_color)
+                    online_targets = bytetracker.update(dets_to_sort, im0.shape)
                     trackTime += time.time() - t0tr
 
-                    tracks = sort_tracker.getTrackers()
+                    online_targets = np.array(online_targets) 
+                    # print(online_targets)
+                    
+                    # if xx == 0:
+                    #     cv2.imwrite('xxx.png', im0.copy())
+
+                    for t in online_targets:
+                        tlwh = [t[0], t[1], t[0] + (t[2] - t[0]) / 2, t[1] +  (t[3] - t[1]) / 2]
+                        tid = str(int(t[4]))
+                        center_of_bbox = (int(tlwh[2]), int(tlwh[3]))
+
+                        if tid in tracks_dict:
+                            tracks_dict[tid].append(center_of_bbox)
+                        else:
+                            tracks_dict[tid] = [center_of_bbox]
 
                     # draw boxes for visualization
-                    if len(tracked_dets)>0:
-                        bbox_xyxy = tracked_dets[:,:4]
-                        identities = tracked_dets[:, 8]
-                        categories = tracked_dets[:, 4]
+                    if len(online_targets)>0:
+                        bbox_xyxy = online_targets[:,:4]
+                        identities = online_targets[:, 4]
+                        categories = online_targets[:, 5]
                         confidences = None
 
+                        
                         if opt.show_track:
                             #loop over tracks
-                            for t, track in enumerate(tracks):               
-                                track_color = colors[int(track.detclass)] if not opt.unique_track_color else sort_tracker.color_list[t]
+                            for key, value in tracks_dict.items():
+                                track_color = colors[0]
 
-                                det_position = "centroidarr"
-                                
-                                posi = getattr(track, det_position)
-
+                                posi = value
                                 [cv2.line(im0, (int(posi[i][0]),
                                                 int(posi[i][1])), 
                                                 (int(posi[i+1][0]),
@@ -208,19 +221,6 @@ def detect(save_img=False):
                                                 track_color, thickness=opt.thickness) 
                                                 for i,_ in  enumerate(posi) 
                                                     if i < len(posi)-1 ]
-
-
-                                # if len(posi) > 10:
-                                #     last10Posi = posi[-10:]
-                                #     sumX = np.sum(np.array(last10Posi), axis=0)[0]
-                                #     sumY = np.sum(np.array(last10Posi), axis=0)[1]
-                                #     prevX = sumX / 10
-                                #     prevY = sumY / 10
-                                #     actX = posi[-1][0]
-                                #     actY = posi[-1][1]
-                                #     futX = actX + 5 * (actX - prevX)
-                                #     futY = actY + 5 * (actY - prevY)
-                                #     cv2.line(im0, (int(futX), int(futY)), (int(actX), int(actY)), (0,0,255), thickness=opt.thickness)
                                 
                 else:
                     bbox_xyxy = dets_to_sort[:,:4]
@@ -230,23 +230,13 @@ def detect(save_img=False):
                 
                 im0 = draw_boxes(im0, bbox_xyxy, identities, categories, confidences, names, colors)
                 ###################################
-                    
-                
-                
+
+
+
             # Print time (inference + NMS)
             print(f'{s}Done. ({(1E3 * (t2 - t1)):.1f}ms) Inference, ({(1E3 * (t3 - t2)):.1f}ms) NMS')
 
             # Stream results
-
-            ######################################################
-            if dataset.mode != 'image' and opt.show_fps:
-                currentTime = time.time()
-
-                fps = 1/(currentTime - startTime)
-                startTime = currentTime
-                cv2.putText(im0, "FPS: " + str(int(fps)), (20, 70), cv2.FONT_HERSHEY_PLAIN, 2, (0,255,0),2)
-            #######################################################
-
             if view_img:
                 cv2.imshow(str(p), im0)
                 cv2.waitKey(1)  # 1 millisecond
@@ -273,10 +263,6 @@ def detect(save_img=False):
                         vid_writer = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
                     vid_writer.write(im0)
 
-    if save_txt or save_img:
-        s = f"\n{len(list(save_dir.glob('labels/*.txt')))} labels saved to {save_dir / 'labels'}" if save_txt else ''
-        #print(f"Results saved to {save_dir}{s}")
-
     print(f'Done. (Total time: {time.time() - t0:.3f}s, Tracking time: {trackTime:.2f}s)')
 
 
@@ -296,7 +282,7 @@ if __name__ == '__main__':
     parser.add_argument('--agnostic-nms', action='store_true', help='class-agnostic NMS')
     parser.add_argument('--augment', action='store_true', help='augmented inference')
     parser.add_argument('--update', action='store_true', help='update all models')
-    parser.add_argument('--project', default='runs/detect_or_track', help='save results to project/name')
+    parser.add_argument('--project', default='runs/detect_or_byteTrack', help='save results to project/name')
     parser.add_argument('--name', default='exp', help='save results to project/name')
     parser.add_argument('--exist-ok', action='store_true', help='existing project/name ok, do not increment')
     parser.add_argument('--no-trace', action='store_true', help='don`t trace model')
@@ -317,11 +303,12 @@ if __name__ == '__main__':
     print(opt)
     np.random.seed(opt.seed)
 
-    sort_tracker = Sort(max_age=5,
-                       min_hits=2,
-                       iou_threshold=0.2) 
-
-    #check_requirements(exclude=('pycocotools', 'thop'))
+    bytetracker = BYTETracker(
+        track_thresh=0.6,   # tracking confidence threshold
+        match_thresh=0.8,   # matching threshold for tracking
+        track_buffer=30,    # the frames for keep lost tracks
+        frame_rate=30       # FPS
+    )
 
     with torch.no_grad():
         if opt.update:  # update all models (to fix SourceChangeWarning)

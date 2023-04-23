@@ -19,8 +19,8 @@ from utils.torch_utils import select_device, load_classifier, time_synchronized,
 from sort import *
 
 
-# python detect_or_track_create_dataset.py --weights yolov7-e6.pt --no-trace --view-img --source inference\images\Jur_1_demo.mp4 --track --classes 0 1 2 3 5 6 7 16 --show-track
-# python detect_or_track_create_dataset.py --weights yolov7-e6.pt --no-trace --view-img --source inference\images\Jur_2_demo.mp4 --track --classes 0 --show-track
+# python detect_or_track_create_dataset.py --weights yolov7.pt --no-trace --view-img --source inference\images\Jur_1_demo.mp4 --track --classes 0 1 2 3 5 6 7 16 --show-track
+# python detect_or_track_create_dataset.py --weights yolov7.pt --no-trace --view-img --source inference\images\Jur_2_demo.mp4 --track --classes 0 --show-track
 
 """Function to Draw Bounding boxes"""
 def draw_boxes(img, bbox, identities=None, categories=None, confidences = None, names=None, colors = None):
@@ -68,6 +68,7 @@ def detect(save_img=False):
     
     # Directories
     save_dir = Path(increment_path(Path(opt.project) / opt.name, exist_ok=opt.exist_ok))  # increment run
+    save_dir = save_dir.parent / f"{save_dir.name}_{int(resultFPS)}"
     if not opt.nosave:
         (save_dir / 'labels' if save_txt else save_dir).mkdir(parents=True, exist_ok=True)  # make dir
 
