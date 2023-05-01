@@ -5,6 +5,8 @@ import cv2
 import torch
 import torch.backends.cudnn as cudnn
 from numpy import random
+import numpy as np
+from numpy.linalg import inv
 
 from models.experimental import attempt_load
 from utils.datasets import LoadStreams, LoadImages
@@ -17,9 +19,11 @@ from utils.torch_utils import select_device, load_classifier, time_synchronized,
 
 from bytetrack.byte_tracker import BYTETracker
 from sort import *
+from intersect import *
+from filterpy.kalman import KalmanFilter
 
-# python detect_or_byteTrack.py --weights yolov7.pt --no-trace --view-img --source inference\images\Jur_1_demo.mp4 --track --classes 0 1 2 3 5 6 7 16 --show-track
-# python detect_or_byteTrack.py --weights yolov7.pt --no-trace --view-img --source inference\images\Jur_2_demo.mp4 --track --classes 0 --show-track          vidsLonger\Jur2_23_06_2022.mp4
+# python detect_or_byteTrack_kalman.py --weights yolov7.pt --no-trace --view-img --source inference\images\Jur_1_demo.mp4 --track --classes 0 1 2 3 5 6 7 16 --show-track --resultFPS 12
+# python detect_or_byteTrack_kalman.py --weights yolov7.pt --no-trace --view-img --source inference\images\Jur_2_demo.mp4 --track --classes 0 --show-track          vidsLonger\Jur2_23_06_2022.mp4
 
 """Function to Draw Bounding boxes"""
 def draw_boxes(img, bbox, identities=None, categories=None, confidences = None, names=None, colors = None):
@@ -48,6 +52,9 @@ def draw_boxes(img, bbox, identities=None, categories=None, confidences = None, 
 
 
 def detect(save_img=False):
+    obs_len = 16
+    pred_len = 62
+    warning_count = 0
     source, weights, view_img, save_txt, imgsz, trace, resultFPS = opt.source, opt.weights, opt.view_img, opt.save_txt, opt.img_size, not opt.no_trace, opt.resultFPS
     save_img = not opt.nosave and not source.endswith('.txt')  # save inference images
     webcam = source.isnumeric() or source.endswith('.txt') or source.lower().startswith(
@@ -104,6 +111,10 @@ def detect(save_img=False):
     t0 = time.time()
     ###################################
     trackTime = 0
+    predictTime = 0
+    color1 = (0,0,0)
+    color2 = (250,0,0)
+    color3 = (0, 0, 220)
     tracks_dict = {}
     # 2.5/6/12 FPS simulation
     xx = -1
@@ -151,6 +162,9 @@ def detect(save_img=False):
         if classify:
             pred = apply_classifier(pred, modelc, img, im0s)
 
+        pred_trajs_persons = []
+        pred_trajs_cars = []
+
         # Process detections
         for i, det in enumerate(pred):  # detections per image
             if webcam:  # batch_size >= 1
@@ -191,15 +205,23 @@ def detect(save_img=False):
                     # if xx == 0:
                     #     cv2.imwrite('xxx1.png', im0.copy())
 
+                    tids = []
                     for t in online_targets:
                         tlwh = [t[0], t[1], t[0] + (t[2] - t[0]) / 2, t[1] +  (t[3] - t[1]) / 2]
-                        tid = str(int(t[4]))
+                        tid = str(int(t[4])) + str(int(t[5])) # id + class
+                        tids.append(tid)
                         center_of_bbox = (int(tlwh[2]), int(tlwh[3]))
 
                         if tid in tracks_dict:
                             tracks_dict[tid].append(center_of_bbox)
                         else:
                             tracks_dict[tid] = [center_of_bbox]
+
+                    for key, value in tracks_dict.copy().items():
+                        if key not in tids:
+                            del tracks_dict[key]
+                        elif len(value) > obs_len + 1:
+                            value.pop(0)
 
                     # draw boxes for visualization
                     if len(online_targets)>0:
@@ -222,6 +244,63 @@ def detect(save_img=False):
                                                 track_color, thickness=opt.thickness) 
                                                 for i,_ in  enumerate(posi) 
                                                     if i < len(posi)-1 ]
+
+                                t0pr = time.time()
+                                if len(posi) >= obs_len:
+                                    last8Posi = posi[-obs_len:]
+                                    # kal = KalmanFilter(dim_x=4, dim_z=2)
+                                    # kal.x = np.array([[0, 0, 0, 0]]).T  # x, y, vx, vy
+
+                                    # kal.P = np.diag([1000, 1000, 1000, 1000])
+                                    # kal.F = np.array([[1, 0, 1, 0], [0, 1, 0, 1], [0, 0, 1, 0], [0, 0, 0, 1]])
+                                    # kal.H = np.array([[1, 0, 0, 0], [0, 1, 0, 0]])
+                                    # kal.R = np.diag([1, 1])
+                                    # kal.Q = np.diag([1, 1, 0.1, 0.1]) 
+
+
+                                    # for i in range(8):
+                                    #     position = last8Posi[i]
+                                    #     kal.predict()
+                                    #     kal.update([position[0], position[1]])
+
+                                    # for i in range(12):
+                                    #     old_pos = kal.x[:,0]
+                                    #     kal.predict()
+                                    #     new_pos = kal.x[:,0]
+                                    #     cv2.line(im0, (int(old_pos[0]),
+                                    #                    int(old_pos[1])), 
+                                    #                   (int(new_pos[0]),
+                                    #                    int(new_pos[1])),
+                                    #                   color2, thickness=opt.thickness)
+
+                                    #     # cv2.circle(im0, (int(kal.x[0,0]), int(kal.x[1,0])), 5, color2, 4)
+                                    #     kal.update(kal.x[:2,:])
+
+                                    sumX = np.sum(np.array(last8Posi), axis=0)[0]
+                                    sumY = np.sum(np.array(last8Posi), axis=0)[1]
+                                    prevX = sumX / obs_len
+                                    prevY = sumY / obs_len
+                                    actX = posi[-1][0]
+                                    actY = posi[-1][1]
+                                    pred_traj = [(actX, actY)]
+                                    for i in range(pred_len):
+                                        divider = obs_len / 2 - 0.5
+                                        futX = actX + (i+1) * ((actX - prevX) / divider)
+                                        futY = actY + (i+1) * ((actY - prevY) / divider)
+                                        cv2.line(im0, (int(pred_traj[-1][0]),
+                                                       int(pred_traj[-1][1])), 
+                                                      (int(futX),
+                                                       int(futY)),
+                                                      color3, thickness=opt.thickness)
+                                    pred_traj.append((futX, futY))
+                                    if key.endswith("0"):
+                                        pred_trajs_persons.append(pred_traj)
+                                    else:
+                                        pred_trajs_cars.append(pred_traj)
+                                predictTime += time.time() - t0pr
+
+                                        
+
                                 
                 else:
                     bbox_xyxy = dets_to_sort[:,:4]
@@ -229,10 +308,16 @@ def detect(save_img=False):
                     categories = dets_to_sort[:, 5]
                     confidences = dets_to_sort[:, 4]
                 
-                im0 = draw_boxes(im0, bbox_xyxy, identities, categories, confidences, names, colors)
+                # im0 = draw_boxes(im0, bbox_xyxy, identities, categories, confidences, names, colors)
                 ###################################
 
 
+            for i in range(len(pred_trajs_persons) - 1):
+                for j in range(len(pred_trajs_cars) - 1):
+                    if doTrajectoriesIntersect(pred_trajs_persons[i], pred_trajs_cars[j]):
+                        cv2.putText(im0, 'WARNING!', (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                        warning_count += 1
+            
 
             # Print time (inference + NMS)
             print(f'{s}Done. ({(1E3 * (t2 - t1)):.1f}ms) Inference, ({(1E3 * (t3 - t2)):.1f}ms) NMS')
@@ -264,7 +349,7 @@ def detect(save_img=False):
                         vid_writer = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
                     vid_writer.write(im0)
 
-    print(f'Done. (Total time: {time.time() - t0:.3f}s, Tracking time: {trackTime:.2f}s)')
+    print(f'Done. (Total time: {time.time() - t0:.3f}s, Tracking time: {trackTime:.2f}s, Predict time: {predictTime:.2f}s, Warnings count: {warning_count})')
 
 
 if __name__ == '__main__':
@@ -283,7 +368,7 @@ if __name__ == '__main__':
     parser.add_argument('--agnostic-nms', action='store_true', help='class-agnostic NMS')
     parser.add_argument('--augment', action='store_true', help='augmented inference')
     parser.add_argument('--update', action='store_true', help='update all models')
-    parser.add_argument('--project', default='runs/detect_or_byteTrack', help='save results to project/name')
+    parser.add_argument('--project', default='runs/detect_or_byteTrack_kalman', help='save results to project/name')
     parser.add_argument('--name', default='exp', help='save results to project/name')
     parser.add_argument('--exist-ok', action='store_true', help='existing project/name ok, do not increment')
     parser.add_argument('--no-trace', action='store_true', help='don`t trace model')
