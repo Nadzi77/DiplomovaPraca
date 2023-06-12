@@ -52,8 +52,8 @@ def draw_boxes(img, bbox, identities=None, categories=None, confidences = None, 
 
 
 def detect(save_img=False):
-    obs_len = 16
-    pred_len = 62
+    obs_len = 12
+    pred_len = 50
     warning_count = 0
     source, weights, view_img, save_txt, imgsz, trace, resultFPS = opt.source, opt.weights, opt.view_img, opt.save_txt, opt.img_size, not opt.no_trace, opt.resultFPS
     save_img = not opt.nosave and not source.endswith('.txt')  # save inference images
@@ -208,7 +208,7 @@ def detect(save_img=False):
                     tids = []
                     for t in online_targets:
                         tlwh = [t[0], t[1], t[0] + (t[2] - t[0]) / 2, t[1] +  (t[3] - t[1]) / 2]
-                        tid = str(int(t[4])) + str(int(t[5])) # id + class
+                        tid = str(int(t[4])) + '_' + str(int(t[5])) # id + class
                         tids.append(tid)
                         center_of_bbox = (int(tlwh[2]), int(tlwh[3]))
 
@@ -312,15 +312,15 @@ def detect(save_img=False):
                 ###################################
 
 
-            for i in range(len(pred_trajs_persons) - 1):
-                for j in range(len(pred_trajs_cars) - 1):
+            for i in range(len(pred_trajs_persons)):
+                for j in range(len(pred_trajs_cars)):
                     if doTrajectoriesIntersect(pred_trajs_persons[i], pred_trajs_cars[j]):
                         cv2.putText(im0, 'WARNING!', (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
                         warning_count += 1
             
 
             # Print time (inference + NMS)
-            print(f'{s}Done. ({(1E3 * (t2 - t1)):.1f}ms) Inference, ({(1E3 * (t3 - t2)):.1f}ms) NMS')
+            # print(f'{s}Done. ({(1E3 * (t2 - t1)):.1f}ms) Inference, ({(1E3 * (t3 - t2)):.1f}ms) NMS')
 
             # Stream results
             if view_img:

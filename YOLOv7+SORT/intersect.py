@@ -10,7 +10,7 @@ def orientation(x1, y1, x2, y2, x3, y3):
     # 0 : Collinear points
     # 1 : Clockwise
     # 2 : Counterclockwise
-    val = (float(y2 - y1) * (x3 - x2)) - (float(x2 - x1) * (y3 - y2))
+    val = (float(y2 - y1) * float(x3 - x2)) - (float(x2 - x1) * float(y3 - y2))
     if (val > 0):
         return 1 # Clockwise
     elif (val < 0):
